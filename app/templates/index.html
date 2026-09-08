@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <main class="container">
+        <h1>FilmMood</h1>
+        <p>Find movies similar to a film you like.</p>
+        <form id="search-form" class="search-form" autocomplete="off">
+            <label for="movie-search">Movie title</label>
+            <input
+                class="form-control"
+                type="search"
+                id="movie-search"
+                placeholder="Search movie name..."
+                aria-controls="dropdown"
+                aria-autocomplete="list"
+            >
+            <div id="dropdown" class="dropdown" role="listbox"></div>
+        </form>
+        <p id="search-status" class="search-status" aria-live="polite"></p>
+    </main>
+{% endblock %}
