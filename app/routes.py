@@ -29,6 +29,7 @@ def movie(movie_id):
 
     return render_template("movie.html", movie={
         "title": movie_data.get("title", "Untitled movie"),
+        "year": (movie_data.get("release_date") or "")[:4],
         "poster_path": movie_data.get("poster_path"),
         "runtime": movie_data.get("runtime"),
         "genres": [genre["name"] for genre in movie_data.get("genres", [])],
