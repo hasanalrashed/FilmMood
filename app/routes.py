@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 
-from .tmdb_api import search_movies
+from .tmdb_api import get_movie_details, search_movies
 
 app = Flask(__name__)
 
@@ -11,8 +11,29 @@ def index():
 
 @app.get("/movie/<int:movie_id>")
 def movie(movie_id):
-    title = request.args.get("title", "Selected movie")
-    return render_template("movie.html", movie_id=movie_id, title=title)
+    try:
+        movie_data = get_movie_details(movie_id)
+    except Exception:
+        return render_template(
+            "movie.html",
+            movie=None,
+            error="Movie details are unavailable right now.",
+        ), 502
+
+    if not movie_data:
+        return render_template(
+            "movie.html",
+            movie=None,
+            error="Movie details are unavailable right now.",
+        ), 503
+
+    return render_template("movie.html", movie={
+        "title": movie_data.get("title", "Untitled movie"),
+        "poster_path": movie_data.get("poster_path"),
+        "runtime": movie_data.get("runtime"),
+        "genres": [genre["name"] for genre in movie_data.get("genres", [])],
+        "rating": movie_data.get("vote_average"),
+    })
 
 
 @app.get("/api/search")
