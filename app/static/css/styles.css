@@ -89,3 +89,39 @@ h1 {
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+
+.movie-details {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.movie-poster {
+    width: 220px;
+    max-width: 40%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.movie-facts {
+    margin: 24px 0;
+}
+
+.movie-facts dt {
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.movie-facts dd {
+    margin: 4px 0 0;
+}
+
+@media (max-width: 520px) {
+    .movie-details {
+        flex-direction: column;
+    }
+
+    .movie-poster {
+        max-width: 220px;
+    }
+}
