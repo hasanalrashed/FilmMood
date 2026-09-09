@@ -34,3 +34,24 @@ def search_movies(title):
 
 	return response.json().get("results", [])[:8]
 
+
+def get_movie_details(movie_id):
+	"""Get the details needed for a movie details page."""
+	if not TMDB_READ_ACCESS_TOKEN:
+		return None
+
+	headers = {
+		"Authorization": f"Bearer {TMDB_READ_ACCESS_TOKEN}",
+		"accept": "application/json",
+	}
+
+	response = requests.get(
+		f"{TMDB_BASE_URL}/movie/{movie_id}",
+		headers=headers,
+		params={"language": "en-US"},
+		timeout=10,
+	)
+	response.raise_for_status()
+
+	return response.json()
+
