@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 
+from .mood import get_mood_profile
 from .tmdb_api import get_movie_details, search_movies
 
 app = Flask(__name__)
@@ -34,6 +35,7 @@ def movie(movie_id):
         "runtime": movie_data.get("runtime"),
         "genres": [genre["name"] for genre in movie_data.get("genres", [])],
         "rating": movie_data.get("vote_average"),
+        "moods": get_mood_profile(movie_id),
     })
 
 

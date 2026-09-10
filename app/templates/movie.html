@@ -21,6 +21,15 @@
                         <dt>Rating</dt>
                         <dd>{{ "%.1f"|format(movie.rating) if movie.rating is not none else "Unknown" }}/10</dd>
                     </dl>
+                    <h2>Mood profile</h2>
+                    <div class="mood-list">
+                        {% for mood, score in movie.moods.items() %}
+                            <div class="mood-row">
+                                <span>{{ mood }}</span>
+                                <span>{{ "%.2f"|format(score) }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </section>
             </div>
         {% else %}
