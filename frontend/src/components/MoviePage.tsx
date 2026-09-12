@@ -129,7 +129,9 @@ export default function MoviePage({ movieId, onBack }: MoviePageProps) {
           <div className="mood-section">
             <h2>Mood profile</h2>
             <div className="mood-list">
-              {Object.entries(movie.moods).map(([mood, score]) => (
+              {Object.entries(movie.moods)
+                .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
+                .map(([mood, score]) => (
                 <div key={mood} className="mood-row">
                   <div className="mood-label">
                     <span>{mood}</span>

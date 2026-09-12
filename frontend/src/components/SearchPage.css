@@ -178,3 +178,33 @@
   margin-top: 1rem;
   text-align: center;
 }
+
+.clear-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  margin-left: auto;
+}
+
+.clear-button:hover {
+  color: var(--text-primary);
+}
+
+.search-box-wrapper input[type=\
+search\]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.no-results-text {
+  margin-top: 2rem;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+

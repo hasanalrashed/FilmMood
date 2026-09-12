@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Search, Film } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, Film, X } from 'lucide-react';
 import './SearchPage.css';
 
 interface MovieResult {
@@ -17,10 +17,25 @@ export default function SearchPage({ onMovieSelect }: SearchPageProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MovieResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
+      setHasSearched(false);
+      setIsDropdownOpen(false);
       return;
     }
 
@@ -31,8 +46,11 @@ export default function SearchPage({ onMovieSelect }: SearchPageProps) {
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         setResults(data);
+        setHasSearched(true);
+        setIsDropdownOpen(true);
       } catch (err) {
         setError('TMDB is unavailable right now.');
+        setHasSearched(true);
       }
     }, 100);
 
@@ -58,16 +76,40 @@ export default function SearchPage({ onMovieSelect }: SearchPageProps) {
           type="search"
           placeholder="Search movie name..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIsDropdownOpen(true);
+          }}
+          onClick={() => {
+            if (query.trim() && results.length > 0) setIsDropdownOpen(true);
+          }}
           aria-label="Movie title"
           autoFocus
         />
+        {query && (
+          <button 
+            className="clear-button" 
+            onClick={() => {
+              setQuery('');
+              setResults([]);
+              setHasSearched(false);
+              setIsDropdownOpen(false);
+            }}
+            aria-label="Clear search"
+          >
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       {error && <p className="error-text">{error}</p>}
 
-      {results.length > 0 && (
-        <div className="results-dropdown glass animate-fade-in">
+      {!error && hasSearched && results.length === 0 && query.trim() !== '' && (
+        <p className="no-results-text">No results found for "{query}"</p>
+      )}
+
+      {isDropdownOpen && results.length > 0 && (
+        <div className="results-dropdown glass animate-fade-in" ref={dropdownRef}>
           {results.map((movie) => (
             <button
               key={movie.id}
