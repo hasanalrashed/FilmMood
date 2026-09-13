@@ -61,46 +61,47 @@ export default function SearchPage() {
           <p>Find out a movie's mood profile.</p>
         </div>
 
-      <div className="search-box-wrapper glass">
-        <Search className="search-icon" size={24} color="var(--text-secondary)" />
-        <input
-          type="search"
-          placeholder="Search movie name..."
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setIsDropdownOpen(true);
-          }}
-          onClick={() => {
-            if (query.trim() && results.length > 0) setIsDropdownOpen(true);
-          }}
-          aria-label="Movie title"
-          autoFocus
-        />
-        {query && (
-          <button 
-            className="clear-button" 
-            onClick={() => {
-              setQuery('');
-              setResults([]);
-              setHasSearched(false);
-              setIsDropdownOpen(false);
+      <div className="search-combo" ref={dropdownRef}>
+        <div className="search-box-wrapper glass">
+          <Search className="search-icon" size={24} color="var(--text-secondary)" />
+          <input
+            type="search"
+            placeholder="Search movie name..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setIsDropdownOpen(true);
             }}
-            aria-label="Clear search"
-          >
-            <X size={20} />
-          </button>
+            onClick={() => {
+              if (query.trim() && results.length > 0) setIsDropdownOpen(true);
+            }}
+            aria-label="Movie title"
+            autoFocus
+          />
+          {query && (
+            <button 
+              className="clear-button" 
+              onClick={() => {
+                setQuery('');
+                setResults([]);
+                setHasSearched(false);
+                setIsDropdownOpen(false);
+              }}
+              aria-label="Clear search"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
+
+        {error && <p className="error-text">{error}</p>}
+
+        {!error && hasSearched && results.length === 0 && query.trim() !== '' && (
+          <p className="no-results-text">No results found for "{query}"</p>
         )}
-      </div>
 
-      {error && <p className="error-text">{error}</p>}
-
-      {!error && hasSearched && results.length === 0 && query.trim() !== '' && (
-        <p className="no-results-text">No results found for "{query}"</p>
-      )}
-
-      {isDropdownOpen && results.length > 0 && (
-        <div className="results-dropdown glass animate-fade-in" ref={dropdownRef}>
+        {isDropdownOpen && results.length > 0 && (
+          <div className="results-dropdown glass animate-fade-in">
           {results.map((movie) => (
             <button
               key={movie.id}
@@ -122,8 +123,9 @@ export default function SearchPage() {
               </div>
             </button>
           ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </main>
     </>
   );

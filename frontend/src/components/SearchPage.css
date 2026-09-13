@@ -55,8 +55,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 80vh;
+  justify-content: flex-start;
+  padding-top: 22vh;
+  min-height: 100vh;
 }
 
 .search-header {
@@ -67,6 +68,14 @@
 .search-header p {
   font-size: 1.25rem;
   margin-top: 0.5rem;
+}
+
+.search-combo {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
 }
 
 .search-box-wrapper {
@@ -103,12 +112,13 @@
 
 .results-dropdown {
   position: absolute;
-  top: calc(50% + 80px); /* Adjust based on search box position */
+  top: 100%;
+  left: 0;
   width: 100%;
-  max-width: 600px;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: calc(70vh - 120px);
   display: flex;
   flex-direction: column;
   z-index: 10;
