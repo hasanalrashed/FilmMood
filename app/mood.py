@@ -1,5 +1,5 @@
 import csv
-import json
+import sqlite3
 import math
 import os
 import re
@@ -44,8 +44,7 @@ DATA_DIR = Path(
     )
 )
 GENOME_SCORES_PATH = DATA_DIR.parent / "genome_2021" / "movie_dataset_public_final" / "scores" / "glmer.csv"
-CACHE_PATH = DATA_DIR.parent.parent / "processed" / "mood_profiles_genome_v1.json"
-_MOOD_PROFILES = None
+DB_PATH = DATA_DIR.parent.parent / "processed" / "mood_profiles.sqlite"
 
 
 def _normalise(value):
@@ -97,24 +96,29 @@ def _build_profiles():
             for mood, score in mood_scores.items()
         }
 
-    CACHE_PATH.parent.mkdir(exist_ok=True)
-    CACHE_PATH.write_text(json.dumps(tmdb_profiles), encoding="utf-8")
-    return tmdb_profiles
-
-
-def _load_profiles():
-    global _MOOD_PROFILES
-    if _MOOD_PROFILES is not None:
-        return _MOOD_PROFILES
-
-    if CACHE_PATH.exists():
-        _MOOD_PROFILES = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
-    else:
-        _MOOD_PROFILES = _build_profiles()
-    return _MOOD_PROFILES
+    DB_PATH.parent.mkdir(exist_ok=True)
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("CREATE TABLE IF NOT EXISTS mood_profile (tmdb_id INTEGER, mood TEXT, score REAL, PRIMARY KEY (tmdb_id, mood))")
+        conn.execute("DELETE FROM mood_profile")
+        
+        rows = []
+        for tmdb_id, scores in tmdb_profiles.items():
+            for mood, score in scores.items():
+                rows.append((int(tmdb_id), mood, score))
+        
+        conn.executemany("INSERT INTO mood_profile (tmdb_id, mood, score) VALUES (?, ?, ?)", rows)
+        conn.commit()
 
 
 def get_mood_profile(tmdb_id):
     """Return 0-1 MovieLens tag scores for a TMDB movie ID."""
-    profile = _load_profiles().get(str(tmdb_id), {})
+    if not DB_PATH.exists():
+        _build_profiles()
+
+    profile = {}
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.execute("SELECT mood, score FROM mood_profile WHERE tmdb_id = ?", (int(tmdb_id),))
+        for row in cursor:
+            profile[row[0]] = row[1]
+            
     return {mood: profile.get(mood, 0.0) for mood in MOOD_TAGS}

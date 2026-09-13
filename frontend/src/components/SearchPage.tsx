@@ -1,19 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Film, X } from 'lucide-react';
+import { searchMovies } from '../api';
+import type { MovieResult } from '../api';
 import './SearchPage.css';
 
-interface MovieResult {
-  id: number;
-  title: string;
-  year: string;
-  poster_path: string | null;
-}
-
-interface SearchPageProps {
-  onMovieSelect: (id: number) => void;
-}
-
-export default function SearchPage({ onMovieSelect }: SearchPageProps) {
+export default function SearchPage() {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MovieResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -42,9 +35,7 @@ export default function SearchPage({ onMovieSelect }: SearchPageProps) {
     const debounceTimeout = setTimeout(async () => {
       setError(null);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
+        const data = await searchMovies(query);
         setResults(data);
         setHasSearched(true);
         setIsDropdownOpen(true);
@@ -114,7 +105,7 @@ export default function SearchPage({ onMovieSelect }: SearchPageProps) {
             <button
               key={movie.id}
               className="result-item"
-              onClick={() => onMovieSelect(movie.id)}
+              onClick={() => navigate(`/movie/${movie.id}`)}
             >
               {movie.poster_path ? (
                 <img 

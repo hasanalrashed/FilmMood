@@ -1,25 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Star, Film as FilmIcon } from 'lucide-react';
+import { getMovie } from '../api';
+import type { MovieData } from '../api';
 import './MoviePage.css';
 
-interface MovieData {
-  id: number;
-  title: string;
-  year: string;
-  poster_path: string | null;
-  backdrop_path: string | null;
-  runtime: number | null;
-  genres: string[];
-  rating: number | null;
-  moods: Record<string, number>;
-}
-
-interface MoviePageProps {
-  movieId: number;
-  onBack: () => void;
-}
-
-export default function MoviePage({ movieId, onBack }: MoviePageProps) {
+export default function MoviePage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const movieId = parseInt(id || '0', 10);
   const [movie, setMovie] = useState<MovieData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,10 +16,7 @@ export default function MoviePage({ movieId, onBack }: MoviePageProps) {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const res = await fetch(`/api/movie/${movieId}`);
-        if (!res.ok) throw new Error('Movie details are unavailable right now.');
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
+        const data = await getMovie(movieId);
         setMovie(data);
       } catch (err: any) {
         setError(err.message);
@@ -53,7 +39,7 @@ export default function MoviePage({ movieId, onBack }: MoviePageProps) {
   if (error || !movie) {
     return (
       <main className="container movie-container animate-fade-in">
-        <button className="back-button" onClick={onBack}>
+        <button className="back-button" onClick={() => navigate('/')}>
           <ArrowLeft size={20} /> Back to search
         </button>
         <h1>Movie unavailable</h1>
@@ -76,7 +62,7 @@ export default function MoviePage({ movieId, onBack }: MoviePageProps) {
         ></div>
       )}
       <main className="container movie-container animate-fade-in">
-        <button className="back-button glass" onClick={onBack}>
+        <button className="back-button glass" onClick={() => navigate('/')}>
           <ArrowLeft size={20} /> Back to search
         </button>
 
