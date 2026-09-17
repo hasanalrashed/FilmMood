@@ -61,14 +61,17 @@ def _matching_concepts(tag):
 
 
 def _build_profiles():
+    """Builds the local mood_profiles.sqlite database from the raw MovieLens dataset."""
     profiles = {}
     movie_lens_to_tmdb = {}
 
+    # 1. Load ID mappings (MovieLens ID to TMDB ID) to query TMDB later
     with (DATA_DIR / "links.csv").open(encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
             if row["tmdbId"]:
                 movie_lens_to_tmdb[row["movieId"]] = row["tmdbId"]
 
+    # 2. Process raw genome scores and aggregate them into core mood buckets
     tag_to_moods = {}
     with GENOME_SCORES_PATH.open(encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
@@ -83,8 +86,10 @@ def _build_profiles():
             score = float(row["score"])
             movie_profile = profiles.setdefault(row["item_id"], {})
             for mood in moods:
+                # Take the maximum score for any tag within a core mood bucket
                 movie_profile[mood] = max(movie_profile.get(mood, 0.0), score)
 
+    # 3. Normalise the final scores between 0 and 1 and link them to their TMDB IDs
     tmdb_profiles = {}
     for movie_lens_id, mood_scores in profiles.items():
         tmdb_id = movie_lens_to_tmdb.get(movie_lens_id)
@@ -96,6 +101,7 @@ def _build_profiles():
             for mood, score in mood_scores.items()
         }
 
+    # 4. Save the processed profiles to a local SQLite database for fast retrieval
     DB_PATH.parent.mkdir(exist_ok=True)
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("CREATE TABLE IF NOT EXISTS mood_profile (tmdb_id INTEGER, mood TEXT, score REAL, PRIMARY KEY (tmdb_id, mood))")

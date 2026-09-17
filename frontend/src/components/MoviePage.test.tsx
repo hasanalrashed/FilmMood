@@ -34,7 +34,7 @@ describe('MoviePage', () => {
   });
 
   it('displays movie details after fetching', async () => {
-    // 1. Arrange: Setup the mock API to immediately resolve with our test movie data
+    // 1. Arrange: Setup the mock API to immediately resolve with the test movie data
     vi.mocked(getMovie).mockResolvedValue({
       id: 238,
       title: 'The Godfather',
